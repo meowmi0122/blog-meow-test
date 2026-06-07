@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
@@ -6,35 +6,57 @@ import rehypeRaw from "rehype-raw";
 import rehypeSlug from "rehype-slug";
 import rehypeHighlight from "rehype-highlight";
 import mermaid from "mermaid";
-
-import "highlight.js/styles/github-dark.css";
+import {
+  Info,
+  Lightbulb,
+  MessageSquareWarning,
+  AlertTriangle,
+  OctagonAlert,
+  Copy,
+  Check,
+} from "lucide-react";
 
 interface Props {
   content: string;
 }
 
-let mermaidInitialized = false;
-function initMermaid() {
-  if (mermaidInitialized) return;
-  mermaidInitialized = true;
-  const isDark = document.documentElement.classList.contains("dark");
-  mermaid.initialize({
-    startOnLoad: false,
-    theme: isDark ? "dark" : "default",
-    securityLevel: "loose",
-    fontFamily: "inherit",
-  });
+function getMermaidTheme() {
+  return document.documentElement.classList.contains("dark") ? "dark" : "default";
 }
 
 function MermaidBlock({ code }: { code: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const idRef = useRef(`mmd-${Math.random().toString(36).slice(2, 10)}`);
+  const [tick, setTick] = useState(0);
 
   useEffect(() => {
-    initMermaid();
+    const onChange = () => setTick((t) => t + 1);
+    window.addEventListener("themechange", onChange);
+    return () => window.removeEventListener("themechange", onChange);
+  }, []);
+
+  useEffect(() => {
     let cancelled = false;
+    const isDark = document.documentElement.classList.contains("dark");
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: getMermaidTheme(),
+      securityLevel: "loose",
+      fontFamily: "inherit",
+      themeVariables: {
+        background: "transparent",
+        primaryColor: isDark ? "#1f1f1f" : "#ffffff",
+        primaryTextColor: isDark ? "#f5f5f5" : "#1a1a1a",
+        primaryBorderColor: isDark ? "#444" : "#ccc",
+        lineColor: isDark ? "#888" : "#666",
+        secondaryColor: isDark ? "#2a2a2a" : "#f5f5f5",
+        tertiaryColor: isDark ? "#1a1a1a" : "#fafafa",
+        textColor: isDark ? "#f5f5f5" : "#1a1a1a",
+      },
+    });
+    const id = `${idRef.current}-${tick}`;
     mermaid
-      .render(idRef.current, code)
+      .render(id, code)
       .then(({ svg }) => {
         if (!cancelled && ref.current) ref.current.innerHTML = svg;
       })
@@ -46,28 +68,73 @@ function MermaidBlock({ code }: { code: string }) {
     return () => {
       cancelled = true;
     };
-  }, [code]);
+  }, [code, tick]);
 
-  return <div ref={ref} className="my-6 flex justify-center overflow-x-auto" />;
+  return (
+    <div
+      ref={ref}
+      className="mermaid-block my-6 flex justify-center overflow-x-auto"
+    />
+  );
+}
+
+function CodeBlock({ className, children }: { className?: string; children: React.ReactNode }) {
+  const [copied, setCopied] = useState(false);
+  const text = String(Array.isArray(children) ? children.join("") : children).replace(/\n$/, "");
+  const onCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      /* noop */
+    }
+  };
+  return (
+    <div className="code-block">
+      <button
+        type="button"
+        onClick={onCopy}
+        className="copy-btn"
+        aria-label="複製程式碼"
+      >
+        {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+        {copied ? "已複製" : "複製"}
+      </button>
+      <pre>
+        <code className={className}>{children}</code>
+      </pre>
+    </div>
+  );
 }
 
 const ALERT_TYPES = ["NOTE", "TIP", "IMPORTANT", "WARNING", "CAUTION"] as const;
 type AlertType = (typeof ALERT_TYPES)[number];
 
+function AlertIcon({ type }: { type: AlertType }) {
+  const cls = "size-[1.1em]";
+  switch (type) {
+    case "NOTE": return <Info className={cls} />;
+    case "TIP": return <Lightbulb className={cls} />;
+    case "IMPORTANT": return <MessageSquareWarning className={cls} />;
+    case "WARNING": return <AlertTriangle className={cls} />;
+    case "CAUTION": return <OctagonAlert className={cls} />;
+  }
+}
+
 function GhAlert({ type, children }: { type: AlertType; children: React.ReactNode }) {
-  const config: Record<AlertType, { label: string; cls: string; icon: string }> = {
-    NOTE: { label: "Note", cls: "alert-note", icon: "ⓘ" },
-    TIP: { label: "Tip", cls: "alert-tip", icon: "💡" },
-    IMPORTANT: { label: "Important", cls: "alert-important", icon: "❗" },
-    WARNING: { label: "Warning", cls: "alert-warning", icon: "⚠️" },
-    CAUTION: { label: "Caution", cls: "alert-caution", icon: "🛑" },
+  const labels: Record<AlertType, string> = {
+    NOTE: "Note",
+    TIP: "Tip",
+    IMPORTANT: "Important",
+    WARNING: "Warning",
+    CAUTION: "Caution",
   };
-  const c = config[type];
   return (
-    <div className={`gh-alert ${c.cls}`}>
+    <div className={`gh-alert alert-${type.toLowerCase()}`}>
       <div className="gh-alert-title">
-        <span className="gh-alert-icon">{c.icon}</span>
-        {c.label}
+        <span className="gh-alert-icon"><AlertIcon type={type} /></span>
+        {labels[type]}
       </div>
       <div className="gh-alert-body">{children}</div>
     </div>
@@ -75,29 +142,58 @@ function GhAlert({ type, children }: { type: AlertType; children: React.ReactNod
 }
 
 export function MarkdownRenderer({ content }: Props) {
+  // re-mount highlighter & mermaid on theme change for proper colors
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const onChange = () => setTick((t) => t + 1);
+    window.addEventListener("themechange", onChange);
+    return () => window.removeEventListener("themechange", onChange);
+  }, []);
+  const isDark =
+    typeof document !== "undefined" &&
+    document.documentElement.classList.contains("dark");
+
   return (
     <div className="markdown-body">
+      {/* Load hljs theme dynamically per mode */}
+      <link
+        rel="stylesheet"
+        href={
+          isDark
+            ? "https://cdn.jsdelivr.net/npm/highlight.js@11/styles/github-dark.min.css"
+            : "https://cdn.jsdelivr.net/npm/highlight.js@11/styles/github.min.css"
+        }
+      />
       <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkBreaks]}
         rehypePlugins={[rehypeRaw, rehypeSlug, rehypeHighlight]}
         components={{
-          code(props) {
-            const { className, children, ...rest } = props as any;
-            const match = /language-(\w+)/.exec(className || "");
-            const lang = match?.[1];
-            const text = String(children).replace(/\n$/, "");
-            if (lang === "mermaid") {
-              return <MermaidBlock code={text} />;
+          pre(props: any) {
+            // Replace <pre><code> with our CodeBlock that adds copy button
+            const child = props.children;
+            if (child && child.props) {
+              const codeProps = child.props;
+              const text = codeProps.children;
+              const className: string = codeProps.className || "";
+              const lang = /language-(\w+)/.exec(className)?.[1];
+              const codeStr = String(Array.isArray(text) ? text.join("") : text).replace(/\n$/, "");
+              if (lang === "mermaid") {
+                return <MermaidBlock code={codeStr} />;
+              }
+              return <CodeBlock className={className}>{text}</CodeBlock>;
             }
+            return <pre {...props} />;
+          },
+          code(props: any) {
+            const { className, children, ...rest } = props;
             return (
               <code className={className} {...rest}>
                 {children}
               </code>
             );
           },
-          blockquote(props) {
-            const { children } = props as any;
-            // Detect GH Alert syntax: first paragraph starts with [!TYPE]
+          blockquote(props: any) {
+            const { children } = props;
             const arr = Array.isArray(children) ? children : [children];
             const firstEl = arr.find((c: any) => c && typeof c === "object");
             const firstText: string | undefined =
@@ -109,7 +205,6 @@ export function MarkdownRenderer({ content }: Props) {
               const m = firstText.match(/^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*\n?/);
               if (m) {
                 const type = m[1] as AlertType;
-                // strip the marker from the rendered children
                 const cloned = arr.map((child: any, i: number) => {
                   if (i !== arr.indexOf(firstEl)) return child;
                   const childChildren = child.props.children;
@@ -132,20 +227,19 @@ export function MarkdownRenderer({ content }: Props) {
             }
             return <blockquote>{children}</blockquote>;
           },
-          img(props) {
-            const { src, alt, ...rest } = props as any;
+          img(props: any) {
+            const { src, alt, ...rest } = props;
             return (
               <img
                 src={src}
                 alt={alt || ""}
                 loading="lazy"
-                className="rounded-xl shadow-sm"
                 {...rest}
               />
             );
           },
-          a(props) {
-            const { href, children, ...rest } = props as any;
+          a(props: any) {
+            const { href, children, ...rest } = props;
             const external = href?.startsWith("http");
             return (
               <a

@@ -2,6 +2,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { getPostById } from "@/lib/posts";
 import { MarkdownRenderer } from "@/components/MarkdownRenderer";
+import { ThemeToggle } from "@/components/ThemeAutoSync";
 
 export const Route = createFileRoute("/blog/$id")({
   loader: ({ params }) => {
@@ -64,23 +65,26 @@ function PostPage() {
   const post = Route.useLoaderData();
 
   return (
-    <main className="mx-auto w-full max-w-[900px] px-5 pt-10 pb-24 sm:pt-16">
-      <Link
-        to="/"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition hover:text-foreground"
-      >
-        <ArrowLeft className="size-4" />
-        返回首頁
-      </Link>
+    <main className="mx-auto w-full max-w-[860px] px-5 pt-8 pb-24 sm:pt-12">
+      <div className="flex items-center justify-between">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition hover:text-foreground"
+        >
+          <ArrowLeft className="size-4" />
+          返回首頁
+        </Link>
+        <ThemeToggle />
+      </div>
 
       <article className="fade-up mt-6">
-        <header className="glass overflow-hidden rounded-3xl">
+        <header className="glass overflow-hidden rounded-2xl">
           <img
             src={post.imageUrl}
             alt={post.title}
             className="aspect-[16/8] w-full object-cover"
           />
-          <div className="p-8">
+          <div className="p-6 sm:p-8">
             <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
               {post.title}
             </h1>
@@ -90,7 +94,7 @@ function PostPage() {
           </div>
         </header>
 
-        <div className="glass mt-8 rounded-3xl p-6 sm:p-10">
+        <div className="glass mt-6 rounded-2xl p-6 sm:p-10">
           <MarkdownRenderer content={post.content} />
         </div>
       </article>
