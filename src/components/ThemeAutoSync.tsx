@@ -1,19 +1,63 @@
-import { useEffect } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { Moon, Sun } from "lucide-react";
 
-/**
- * Applies the `dark` class on <html> based on system preference and keeps it
- * in sync. No user toggle — auto follows system.
- */
+type Theme = "light" | "dark";
+
+function getInitialTheme(): Theme {
+  if (typeof window === "undefined") return "light";
+  const saved = localStorage.getItem("theme");
+  if (saved === "light" || saved === "dark") return saved;
+  return "light";
+}
+
+function applyTheme(theme: Theme) {
+  document.documentElement.classList.toggle("dark", theme === "dark");
+  document.documentElement.dataset.theme = theme;
+  window.dispatchEvent(new CustomEvent("themechange", { detail: theme }));
+}
+
+export function useTheme(): [Theme, () => void] {
+  const [theme, setTheme] = useState<Theme>("light");
+
+  useEffect(() => {
+    const t = getInitialTheme();
+    setTheme(t);
+    applyTheme(t);
+  }, []);
+
+  const toggle = useCallback(() => {
+    setTheme((prev) => {
+      const next: Theme = prev === "dark" ? "light" : "dark";
+      localStorage.setItem("theme", next);
+      applyTheme(next);
+      return next;
+    });
+  }, []);
+
+  return [theme, toggle];
+}
+
+export function ThemeToggle() {
+  const [theme, toggle] = useTheme();
+  return (
+    <button
+      onClick={toggle}
+      aria-label="切換主題"
+      className="glass inline-flex size-10 items-center justify-center rounded-full transition hover:scale-105"
+    >
+      {theme === "dark" ? (
+        <Sun className="size-5" />
+      ) : (
+        <Moon className="size-5" />
+      )}
+    </button>
+  );
+}
+
+// Backward-compat: previously auto-synced. Now just applies stored theme.
 export function ThemeAutoSync() {
   useEffect(() => {
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const apply = (matches: boolean) => {
-      document.documentElement.classList.toggle("dark", matches);
-    };
-    apply(mq.matches);
-    const handler = (e: MediaQueryListEvent) => apply(e.matches);
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
+    applyTheme(getInitialTheme());
   }, []);
   return null;
 }
