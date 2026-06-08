@@ -187,9 +187,9 @@ export function MarkdownRenderer({ content }: Props) {
           code(props: any) {
             const { className, children, ...rest } = props;
             return (
-              <code className={className} {...rest}>
+              <InlineCode className={className} {...rest}>
                 {children}
-              </code>
+              </InlineCode>
             );
           },
           blockquote(props: any) {
