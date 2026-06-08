@@ -108,6 +108,38 @@ function CodeBlock({ className, children }: { className?: string; children: Reac
   );
 }
 
+function InlineCode({ className, children, ...rest }: any) {
+  const [copied, setCopied] = useState(false);
+  const text = String(Array.isArray(children) ? children.join("") : children ?? "");
+  const onClick = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1200);
+    } catch {
+      /* noop */
+    }
+  };
+  return (
+    <code
+      className={`inline-code${copied ? " inline-code-copied" : ""}${className ? ` ${className}` : ""}`}
+      onClick={onClick}
+      title={copied ? "已複製" : "點擊複製"}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick();
+        }
+      }}
+      {...rest}
+    >
+      {children}
+    </code>
+  );
+}
+
 const ALERT_TYPES = ["NOTE", "TIP", "IMPORTANT", "WARNING", "CAUTION"] as const;
 type AlertType = (typeof ALERT_TYPES)[number];
 
@@ -187,9 +219,9 @@ export function MarkdownRenderer({ content }: Props) {
           code(props: any) {
             const { className, children, ...rest } = props;
             return (
-              <code className={className} {...rest}>
+              <InlineCode className={className} {...rest}>
                 {children}
-              </code>
+              </InlineCode>
             );
           },
           blockquote(props: any) {

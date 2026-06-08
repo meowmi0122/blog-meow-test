@@ -197,6 +197,15 @@
   border-radius: 0.375rem;
   border: 1px solid var(--color-border);
   color: var(--color-foreground);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.markdown-body :not(pre) > code:hover {
+  background: color-mix(in oklab, var(--color-primary) 12%, var(--color-muted));
+}
+.markdown-body :not(pre) > code.inline-code-copied {
+  background: color-mix(in oklab, var(--color-primary) 20%, var(--color-muted));
+  border-color: var(--color-primary);
 }
 
 /* Code block wrapper with copy button */
