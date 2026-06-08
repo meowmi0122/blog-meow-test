@@ -77,12 +77,12 @@ function Home() {
             className="fade-up hover-lift glass group flex gap-4 overflow-hidden rounded-2xl p-3 text-left hover:-translate-y-0.5 hover:shadow-md"
             style={{ animationDelay: `${i * 50}ms` }}
           >
-            <div className="aspect-square size-20 shrink-0 overflow-hidden rounded-xl">
+            <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-muted">
               <img
                 src={p.imageUrl}
                 alt={p.title}
                 loading="lazy"
-                className="size-full object-cover transition duration-500 group-hover:scale-105"
+                className="max-h-full max-w-full object-contain transition duration-500 group-hover:scale-105"
               />
             </div>
             <div className="flex flex-1 flex-col justify-center gap-1">

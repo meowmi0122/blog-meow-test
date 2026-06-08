@@ -79,11 +79,13 @@ function PostPage() {
 
       <article className="fade-up mt-6">
         <header className="glass overflow-hidden rounded-2xl">
-          <img
-            src={post.imageUrl}
-            alt={post.title}
-            className="aspect-[16/8] w-full object-cover"
-          />
+          <div className="flex max-h-[320px] items-center justify-center bg-muted p-4 sm:p-6">
+            <img
+              src={post.imageUrl}
+              alt={post.title}
+              className="max-h-[280px] w-auto max-w-full rounded-xl object-contain"
+            />
+          </div>
           <div className="p-6 sm:p-8">
             <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
               {post.title}
