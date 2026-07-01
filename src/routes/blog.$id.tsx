@@ -1,8 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ArrowLeft } from "lucide-react";
-import { getPostById } from "@/lib/posts";
+import { getPostById, resolveImageSize } from "@/lib/posts";
 import { MarkdownRenderer } from "@/components/MarkdownRenderer";
-import { ThemeToggle } from "@/components/ThemeAutoSync";
+import { Navbar } from "@/components/Navbar";
 
 export const Route = createFileRoute("/blog/$id")({
   loader: ({ params }) => {
@@ -22,19 +21,24 @@ export const Route = createFileRoute("/blog/$id")({
         { property: "og:title", content: p.title },
         { property: "og:description", content: `發佈於 ${p.date}` },
         { property: "og:type", content: "article" },
-        { property: "og:image", content: p.imageUrl },
+        ...(p.imageUrl
+          ? [
+              { property: "og:image", content: p.imageUrl },
+              { name: "twitter:image", content: p.imageUrl },
+            ]
+          : []),
         { property: "og:url", content: `/blog/${p.id}` },
         { name: "twitter:card", content: "summary_large_image" },
         { name: "twitter:title", content: p.title },
-        { name: "twitter:image", content: p.imageUrl },
       ],
       links: [{ rel: "canonical", href: `/blog/${p.id}` }],
     };
   },
   component: PostPage,
   notFoundComponent: () => (
-    <div className="flex min-h-screen items-center justify-center px-4">
-      <div className="glass max-w-md rounded-3xl p-10 text-center">
+    <div className="mx-auto max-w-[860px] px-5 pt-8 pb-24">
+      <Navbar />
+      <div className="glass mt-10 rounded-3xl p-10 text-center">
         <h1 className="text-3xl font-bold">文章不存在</h1>
         <p className="mt-3 text-muted-foreground">這篇文章可能還沒被建立。</p>
         <Link
@@ -47,8 +51,9 @@ export const Route = createFileRoute("/blog/$id")({
     </div>
   ),
   errorComponent: ({ reset }) => (
-    <div className="flex min-h-screen items-center justify-center px-4">
-      <div className="glass max-w-md rounded-3xl p-10 text-center">
+    <div className="mx-auto max-w-[860px] px-5 pt-8 pb-24">
+      <Navbar />
+      <div className="glass mt-10 rounded-3xl p-10 text-center">
         <h1 className="text-xl font-semibold">載入文章時發生錯誤</h1>
         <button
           onClick={reset}
@@ -63,37 +68,42 @@ export const Route = createFileRoute("/blog/$id")({
 
 function PostPage() {
   const post = Route.useLoaderData();
+  const size = resolveImageSize(post.imageSize);
 
   return (
-    <main className="mx-auto w-full max-w-[860px] px-5 pt-8 pb-24 sm:pt-12">
-      <div className="flex items-center justify-between">
-        <Link
-          to="/"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition hover:text-foreground"
-        >
-          <ArrowLeft className="size-4" />
-          返回首頁
-        </Link>
-        <ThemeToggle />
-      </div>
+    <main className="mx-auto w-full max-w-[860px] px-5 pt-8 pb-24 sm:pt-10">
+      <Navbar />
 
       <article className="fade-up mt-6">
-        <header className="glass overflow-hidden rounded-2xl">
-          <div className="flex max-h-[320px] items-center justify-center bg-muted p-4 sm:p-6">
-            <img
-              src={post.imageUrl}
-              alt={post.title}
-              className="max-h-[280px] w-auto max-w-full rounded-xl object-contain"
-            />
-          </div>
-          <div className="p-6 sm:p-8">
-            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              {post.title}
-            </h1>
-            <time className="mt-3 block text-sm text-muted-foreground">
-              {post.date}
-            </time>
-          </div>
+        <header className="glass rounded-2xl p-6 sm:p-8">
+          {post.imageUrl && (
+            <div className="mb-6 flex justify-center">
+              <img
+                src={post.imageUrl}
+                alt={post.title}
+                width={size.width}
+                height={size.height}
+                style={{
+                  width: size.width ? `${size.width}px` : undefined,
+                  height: size.height ? `${size.height}px` : undefined,
+                  maxWidth: "100%",
+                  maxHeight: "360px",
+                }}
+                className="rounded-xl object-contain"
+              />
+            </div>
+          )}
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            {post.title}
+          </h1>
+          <time className="mt-3 block text-sm text-muted-foreground">
+            {post.date}
+            {post.visibility === "private" && (
+              <span className="ml-2 rounded-full border border-border px-2 py-0.5 text-xs">
+                私人
+              </span>
+            )}
+          </time>
         </header>
 
         <div className="glass mt-6 rounded-2xl p-6 sm:p-10">
