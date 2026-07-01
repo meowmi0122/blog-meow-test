@@ -111,7 +111,8 @@ function CodeBlock({ className, children }: { className?: string; children: Reac
 function InlineCode({ className, children, ...rest }: any) {
   const [copied, setCopied] = useState(false);
   const text = String(Array.isArray(children) ? children.join("") : children ?? "");
-  const onClick = async () => {
+  const onCopy = async (e?: React.MouseEvent | React.KeyboardEvent) => {
+    e?.stopPropagation();
     try {
       await navigator.clipboard.writeText(text);
       setCopied(true);
@@ -121,22 +122,25 @@ function InlineCode({ className, children, ...rest }: any) {
     }
   };
   return (
-    <code
-      className={`inline-code${copied ? " inline-code-copied" : ""}${className ? ` ${className}` : ""}`}
-      onClick={onClick}
-      title={copied ? "已複製" : "點擊複製"}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onClick();
-        }
-      }}
-      {...rest}
-    >
-      {children}
-    </code>
+    <span className="inline-code-wrap">
+      <code
+        className={`inline-code${copied ? " inline-code-copied" : ""}${className ? ` ${className}` : ""}`}
+        onClick={onCopy}
+        title={copied ? "已複製" : "點擊複製"}
+        {...rest}
+      >
+        {children}
+      </code>
+      <button
+        type="button"
+        onClick={onCopy}
+        className="inline-copy-btn"
+        aria-label={copied ? "已複製" : "複製"}
+        tabIndex={-1}
+      >
+        {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
+      </button>
+    </span>
   );
 }
 

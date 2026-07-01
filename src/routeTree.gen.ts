@@ -9,9 +9,15 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SlugRouteImport } from './routes/$slug'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BlogIdRouteImport } from './routes/blog.$id'
 
+const SlugRoute = SlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -25,32 +31,43 @@ const BlogIdRoute = BlogIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/$slug': typeof SlugRoute
   '/blog/$id': typeof BlogIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/$slug': typeof SlugRoute
   '/blog/$id': typeof BlogIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/$slug': typeof SlugRoute
   '/blog/$id': typeof BlogIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/blog/$id'
+  fullPaths: '/' | '/$slug' | '/blog/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/blog/$id'
-  id: '__root__' | '/' | '/blog/$id'
+  to: '/' | '/$slug' | '/blog/$id'
+  id: '__root__' | '/' | '/$slug' | '/blog/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  SlugRoute: typeof SlugRoute
   BlogIdRoute: typeof BlogIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/$slug': {
+      id: '/$slug'
+      path: '/$slug'
+      fullPath: '/$slug'
+      preLoaderRoute: typeof SlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -70,6 +87,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  SlugRoute: SlugRoute,
   BlogIdRoute: BlogIdRoute,
 }
 export const routeTree = rootRouteImport
