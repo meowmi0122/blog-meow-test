@@ -208,6 +208,36 @@
   border-color: var(--color-primary);
 }
 
+/* Inline code with visible copy button on hover */
+.inline-code-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15em;
+  vertical-align: baseline;
+}
+.inline-code-wrap .inline-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.15em;
+  border-radius: 0.3rem;
+  background: transparent;
+  color: var(--color-muted-foreground);
+  border: 1px solid transparent;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s, background 0.15s, color 0.15s;
+}
+.inline-code-wrap:hover .inline-copy-btn,
+.inline-code-wrap .inline-copy-btn:focus-visible {
+  opacity: 1;
+}
+.inline-code-wrap .inline-copy-btn:hover {
+  background: var(--color-muted);
+  color: var(--color-foreground);
+  border-color: var(--color-border);
+}
+
 /* Code block wrapper with copy button */
 .code-block {
   position: relative;
