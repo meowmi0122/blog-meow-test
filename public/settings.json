@@ -1,6 +1,6 @@
 {
   "_comment_homeMode": "首頁顯示模式: 'blog' = 顯示文章列表, 'markdown' = 顯示 public/index.md 內容",
-  "homeMode": "blog",
+  "homeMode": "markdown",
   "_comment_navFolder": "導航列頁面資料夾名稱, 預設為 public/pages/",
   "navFolder": "pages",
   "_comment_siteName": "左上角網站名稱 (顯示在導航列)",
