@@ -44,13 +44,13 @@ function Home() {
         <header className="fade-up mt-6 flex flex-col items-center text-center">
           <img
             src="/logo.png"
-            alt="Blog Meow Logo"
+            alt={`${homeSettings.brandName} Logo`}
             width={96}
             height={96}
             className="block"
           />
           <h1 className="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">
-            Blog Meow
+            {homeSettings.brandName}
           </h1>
         </header>
         <article className="fade-up glass mt-8 rounded-2xl p-6 sm:p-10">
@@ -67,15 +67,16 @@ function Home() {
       <header className="fade-up mt-4 flex flex-col items-center text-center">
         <img
           src="/logo.png"
-          alt="Blog Meow Logo"
+          alt={`${homeSettings.brandName} Logo`}
           width={96}
           height={96}
           className="block"
         />
         <h1 className="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">
-          Blog Meow
+          {homeSettings.brandName}
         </h1>
       </header>
+
 
       <div className="fade-up mt-8 w-full max-w-xl self-center">
         <div className="glass flex items-center gap-3 rounded-full px-5 py-3">
@@ -97,8 +98,8 @@ function Home() {
           return (
             <Link
               key={p.id}
-              to="/blog/$id"
-              params={{ id: String(p.id) }}
+              to="/$slug"
+              params={{ slug: String(p.id) }}
               className="fade-up hover-lift glass group flex items-center gap-4 overflow-hidden rounded-2xl p-3 text-left hover:-translate-y-0.5 hover:shadow-md"
               style={{ animationDelay: `${i * 50}ms` }}
             >

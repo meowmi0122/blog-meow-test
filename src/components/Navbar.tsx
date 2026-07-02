@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { navItems } from "@/lib/pages";
 import { ThemeToggle } from "@/components/ThemeAutoSync";
+import { homeSettings } from "@/lib/home";
 
 export function Navbar() {
   return (
@@ -9,7 +10,7 @@ export function Navbar() {
         to="/"
         className="text-sm font-semibold tracking-tight transition hover:opacity-80"
       >
-        Blog Meow
+        {homeSettings.siteName}
       </Link>
       <nav className="flex items-center gap-2">
         {navItems.map((item) => (
