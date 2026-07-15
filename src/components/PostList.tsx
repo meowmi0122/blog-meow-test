@@ -66,7 +66,6 @@ export function PostList({ title, showLogo = true, posts }: Props) {
               key={p.id}
               to="/$slug"
               params={{ slug: String(p.id) }}
-              search={q ? { q } : undefined as never}
               className="fade-up hover-lift glass group flex items-center gap-4 overflow-hidden rounded-2xl p-3 text-left hover:-translate-y-0.5 hover:shadow-md"
               style={{ animationDelay: `${i * 50}ms` }}
             >
