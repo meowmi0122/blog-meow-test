@@ -1,15 +1,20 @@
 // 動態路由: /{slug}
 // 1. 若 slug 是數字 → 顯示對應 ID 的部落格文章 (public/blog/*/setting.json 的 id)
-// 2. 否則 → 顯示 public/pages/{slug}.md 導航頁
+// 2. 若 slug 對應 public/pages/settings.json 中的導航項目 → 顯示與首頁相同的文章列表 (以該項目名稱為標題)
+// 3. 若 slug 對應 public/pages/{slug}.md → 顯示 Markdown 導航頁 (fallback)
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { getPageBySlug } from "@/lib/pages";
+import { useRef } from "react";
+import { getPageBySlug, navItems, type NavItem } from "@/lib/pages";
 import { getPostById, resolveImageSize, type Post } from "@/lib/posts";
 import { MarkdownRenderer } from "@/components/MarkdownRenderer";
 import { Navbar } from "@/components/Navbar";
+import { PostList } from "@/components/PostList";
+import { ArticleSearch } from "@/components/ArticleSearch";
 
 type LoaderData =
   | { kind: "post"; post: Post }
-  | { kind: "page"; item: { label: string; slug: string; description?: string }; content: string };
+  | { kind: "nav-list"; item: NavItem }
+  | { kind: "page"; item: NavItem; content: string };
 
 export const Route = createFileRoute("/$slug")({
   loader: ({ params }): LoaderData => {
@@ -20,6 +25,10 @@ export const Route = createFileRoute("/$slug")({
       if (!post) throw notFound();
       return { kind: "post", post };
     }
+    // 導航列項目 → 部落格列表頁
+    const navItem = navItems.find((i) => i.slug === raw);
+    if (navItem) return { kind: "nav-list", item: navItem };
+    // fallback: public/pages/{slug}.md
     const page = getPageBySlug(raw);
     if (!page) throw notFound();
     return { kind: "page", item: page.item, content: page.content };
@@ -93,49 +102,17 @@ export const Route = createFileRoute("/$slug")({
 function SlugView() {
   const data = Route.useLoaderData();
 
-  if (data.kind === "post") {
-    const post = data.post;
-    const size = resolveImageSize(post.imageSize);
+  if (data.kind === "nav-list") {
     return (
-      <main className="mx-auto w-full max-w-[860px] px-5 pt-8 pb-24 sm:pt-10">
+      <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-5 pt-8 pb-24 sm:pt-10">
         <Navbar />
-        <article className="fade-up mt-6">
-          <header className="glass rounded-2xl p-6 sm:p-8">
-            {post.imageUrl && (
-              <div className="mb-6 flex justify-center">
-                <img
-                  src={post.imageUrl}
-                  alt={post.title}
-                  width={size.width}
-                  height={size.height}
-                  style={{
-                    width: size.width ? `${size.width}px` : undefined,
-                    height: size.height ? `${size.height}px` : undefined,
-                    maxWidth: "100%",
-                    maxHeight: "360px",
-                  }}
-                  className="rounded-xl object-contain"
-                />
-              </div>
-            )}
-            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              {post.title}
-            </h1>
-            <time className="mt-3 block text-sm text-muted-foreground">
-              {post.date}
-              {post.visibility === "private" && (
-                <span className="ml-2 rounded-full border border-border px-2 py-0.5 text-xs">
-                  私人
-                </span>
-              )}
-            </time>
-          </header>
-          <div className="glass mt-6 rounded-2xl p-6 sm:p-10">
-            <MarkdownRenderer content={post.content} />
-          </div>
-        </article>
+        <PostList title={data.item.label} showLogo={false} />
       </main>
     );
+  }
+
+  if (data.kind === "post") {
+    return <PostView post={data.post} />;
   }
 
   return (
@@ -144,6 +121,52 @@ function SlugView() {
       <article className="fade-up glass mt-6 rounded-2xl p-6 sm:p-10">
         <h1 className="sr-only">{data.item.label}</h1>
         <MarkdownRenderer content={data.content} />
+      </article>
+    </main>
+  );
+}
+
+function PostView({ post }: { post: Post }) {
+  const size = resolveImageSize(post.imageSize);
+  const contentRef = useRef<HTMLDivElement>(null);
+  return (
+    <main className="mx-auto w-full max-w-[860px] px-5 pt-8 pb-24 sm:pt-10">
+      <Navbar />
+      <article className="fade-up mt-6">
+        <header className="glass rounded-2xl p-6 sm:p-8">
+          {post.imageUrl && (
+            <div className="mb-6 flex justify-center">
+              <img
+                src={post.imageUrl}
+                alt={post.title}
+                width={size.width}
+                height={size.height}
+                style={{
+                  width: size.width ? `${size.width}px` : undefined,
+                  height: size.height ? `${size.height}px` : undefined,
+                  maxWidth: "100%",
+                  maxHeight: "360px",
+                }}
+                className="rounded-xl object-contain"
+              />
+            </div>
+          )}
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            {post.title}
+          </h1>
+          <time className="mt-3 block text-sm text-muted-foreground">
+            {post.date}
+            {post.visibility === "private" && (
+              <span className="ml-2 rounded-full border border-border px-2 py-0.5 text-xs">
+                私人
+              </span>
+            )}
+          </time>
+        </header>
+        <ArticleSearch containerRef={contentRef} contentKey={String(post.id)} />
+        <div ref={contentRef} className="glass mt-4 rounded-2xl p-6 sm:p-10">
+          <MarkdownRenderer content={post.content} />
+        </div>
       </article>
     </main>
   );

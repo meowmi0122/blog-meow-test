@@ -208,34 +208,68 @@
   border-color: var(--color-primary);
 }
 
-/* Inline code with visible copy button on hover */
+/* Inline code with copy button that slides out on hover / focus / tap */
 .inline-code-wrap {
   display: inline-flex;
   align-items: center;
-  gap: 0.15em;
   vertical-align: baseline;
 }
 .inline-code-wrap .inline-copy-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.15em;
+  width: 0;
+  height: 1.4em;
+  padding: 0;
+  margin-left: 0;
   border-radius: 0.3rem;
   background: transparent;
   color: var(--color-muted-foreground);
   border: 1px solid transparent;
   cursor: pointer;
   opacity: 0;
-  transition: opacity 0.15s, background 0.15s, color 0.15s;
+  overflow: hidden;
+  transition: width 0.18s ease, margin-left 0.18s ease,
+    padding 0.18s ease, opacity 0.18s ease,
+    background 0.15s, color 0.15s;
 }
 .inline-code-wrap:hover .inline-copy-btn,
+.inline-code-wrap:focus-within .inline-copy-btn,
 .inline-code-wrap .inline-copy-btn:focus-visible {
+  width: 1.5em;
+  padding: 0.15em;
+  margin-left: 0.2em;
   opacity: 1;
 }
 .inline-code-wrap .inline-copy-btn:hover {
   background: var(--color-muted);
   color: var(--color-foreground);
   border-color: var(--color-border);
+}
+
+/* In-article search highlights */
+mark.search-hit {
+  background: #fde047; /* yellow-300 */
+  color: #1a1a1a;
+  border-radius: 0.2em;
+  padding: 0 0.1em;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+mark.search-hit-active {
+  background: #f59e0b; /* amber-500 */
+  color: #1a1a1a;
+  outline: 2px solid #f59e0b;
+  outline-offset: 1px;
+}
+.dark mark.search-hit {
+  background: #fbbf24;
+  color: #111;
+}
+.dark mark.search-hit-active {
+  background: #f97316;
+  color: #111;
+  outline-color: #f97316;
 }
 
 /* Code block wrapper with copy button */
