@@ -398,12 +398,16 @@ mark.search-hit-active {
   align-items: center;
   gap: 0.5em;
   font-weight: 700;
-  margin-bottom: 0.3em;
+  margin-bottom: 0.15em;
+  line-height: 1.4;
 }
 .gh-alert-icon { display: inline-flex; }
 .gh-alert-icon svg { width: 1.1em; height: 1.1em; }
+.gh-alert-body { line-height: 1.6; }
+.gh-alert-body p { margin: 0.25em 0; }
 .gh-alert-body p:first-child { margin-top: 0; }
 .gh-alert-body p:last-child { margin-bottom: 0; }
+.gh-alert-body br:first-child { display: none; }
 .alert-note { border-color: oklch(0.6 0.18 250); }
 .alert-note .gh-alert-title, .alert-note .gh-alert-icon { color: oklch(0.55 0.2 250); }
 .alert-tip { border-color: oklch(0.65 0.18 150); }
@@ -426,3 +430,53 @@ mark.search-hit-active {
   to { opacity: 1; transform: translateY(0); }
 }
 .fade-up { animation: fadeUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+
+/* Download card block: ```download\npath: ...\nsize: ...``` */
+.download-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75em;
+  margin: 1em 0;
+  padding: 0.7em 1em;
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  background: var(--color-muted);
+  color: var(--color-foreground) !important;
+  text-decoration: none !important;
+  transition: background 0.15s, border-color 0.15s, transform 0.15s;
+  max-width: 100%;
+}
+.download-card:hover {
+  background: color-mix(in oklab, var(--color-primary) 8%, var(--color-muted));
+  border-color: var(--color-primary);
+  opacity: 1 !important;
+}
+.download-card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25em;
+  height: 2.25em;
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-background);
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+.download-card-meta {
+  display: inline-flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.3;
+}
+.download-card-name {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.download-card-size {
+  font-size: 0.8rem;
+  color: var(--color-muted-foreground);
+  margin-top: 0.15em;
+}

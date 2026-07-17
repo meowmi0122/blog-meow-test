@@ -14,6 +14,7 @@ import {
   OctagonAlert,
   Copy,
   Check,
+  Download,
 } from "lucide-react";
 
 interface Props {
@@ -105,6 +106,38 @@ function CodeBlock({ className, children }: { className?: string; children: Reac
         <code className={className}>{children}</code>
       </pre>
     </div>
+  );
+}
+
+function DownloadBlock({ code }: { code: string }) {
+  // Parse simple key: value lines
+  const data: Record<string, string> = {};
+  for (const line of code.split(/\r?\n/)) {
+    const m = line.match(/^\s*([A-Za-z_][A-Za-z0-9_-]*)\s*:\s*(.*)$/);
+    if (m) data[m[1].toLowerCase()] = m[2].trim();
+  }
+  const rawPath = data.path ?? "";
+  const size = data.size ?? "";
+  // Strip leading "public/" so /public/files/foo.pdf becomes /files/foo.pdf
+  const href = rawPath.replace(/^\/?public\//, "/");
+  // Display only the file name
+  const displayName = rawPath.split(/[\\/]/).filter(Boolean).pop() ?? rawPath;
+  if (!rawPath) return null;
+  return (
+    <a
+      href={href}
+      download={displayName}
+      className="download-card"
+      aria-label={`下載 ${displayName}`}
+    >
+      <span className="download-card-icon">
+        <Download className="size-5" />
+      </span>
+      <span className="download-card-meta">
+        <span className="download-card-name">{displayName}</span>
+        {size && <span className="download-card-size">{size}</span>}
+      </span>
+    </a>
   );
 }
 
@@ -216,6 +249,9 @@ export function MarkdownRenderer({ content }: Props) {
               if (lang === "mermaid") {
                 return <MermaidBlock code={codeStr} />;
               }
+              if (lang === "download") {
+                return <DownloadBlock code={codeStr} />;
+              }
               return <CodeBlock className={className}>{text}</CodeBlock>;
             }
             return <pre {...props} />;
@@ -245,13 +281,27 @@ export function MarkdownRenderer({ content }: Props) {
                   if (i !== arr.indexOf(firstEl)) return child;
                   const childChildren = child.props.children;
                   const newChildren = Array.isArray(childChildren)
-                    ? [
-                        (childChildren[0] as string).replace(
-                          /^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*\n?/,
-                          "",
-                        ),
-                        ...childChildren.slice(1),
-                      ]
+                    ? (() => {
+                        const rest = [
+                          (childChildren[0] as string).replace(
+                            /^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*\n?/,
+                            "",
+                          ),
+                          ...childChildren.slice(1),
+                        ];
+                        // Drop leading empty strings and a leading <br> that
+                        // remark-breaks inserts for the newline after [!NOTE].
+                        while (
+                          rest.length &&
+                          ((typeof rest[0] === "string" && rest[0] === "") ||
+                            (rest[0] &&
+                              typeof rest[0] === "object" &&
+                              (rest[0] as any).type === "br"))
+                        ) {
+                          rest.shift();
+                        }
+                        return rest;
+                      })()
                     : (childChildren as string).replace(
                         /^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*\n?/,
                         "",
