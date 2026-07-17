@@ -398,12 +398,16 @@ mark.search-hit-active {
   align-items: center;
   gap: 0.5em;
   font-weight: 700;
-  margin-bottom: 0.3em;
+  margin-bottom: 0.15em;
+  line-height: 1.4;
 }
 .gh-alert-icon { display: inline-flex; }
 .gh-alert-icon svg { width: 1.1em; height: 1.1em; }
+.gh-alert-body { line-height: 1.6; }
+.gh-alert-body p { margin: 0.25em 0; }
 .gh-alert-body p:first-child { margin-top: 0; }
 .gh-alert-body p:last-child { margin-bottom: 0; }
+.gh-alert-body br:first-child { display: none; }
 .alert-note { border-color: oklch(0.6 0.18 250); }
 .alert-note .gh-alert-title, .alert-note .gh-alert-icon { color: oklch(0.55 0.2 250); }
 .alert-tip { border-color: oklch(0.65 0.18 150); }
