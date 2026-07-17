@@ -10,10 +10,10 @@
 
 ```json
 {
-  "homeMode": "blog",       // "blog" = 顯示文章列表, "markdown" = 顯示 public/index.md
-  "navFolder": "pages",     // 導航列頁面資料夾名 (預設 pages)
-  "siteName": "Blog Meow",  // 左上角網站名稱
-  "brandName": "Blog Meow"  // 首頁 Logo 下方大標題
+  "homeMode": "blog",
+  "navFolder": "pages",
+  "siteName": "Blog Meow",
+  "brandName": "Blog Meow"
 }
 ```
 
@@ -28,23 +28,22 @@
 
 ---
 
-## 3. 導航列項目 `public/pages/settings.json`
+## 3. 導航列項目 `public/pages/{slug}.json`
 
-管理右上角導航列的按鈕與對應頁面。
+每一個導航項目對應一個獨立的 JSON:
 
 ```json
 {
-  "items": [
-    {
-      "label": "教學",           // 顯示文字
-      "slug": "tutorial",       // 網址 → /tutorial
-      "description": "使用教學"  // SEO 描述 (可省略)
-    }
-  ]
+  "label": "教學",
+  "description": "使用教學",
+  "pagesblog": false
 }
 ```
 
-新增一個項目後,只要在 `public/pages/{slug}.md` 建立同名 Markdown 檔即可,例如 `public/pages/about.md` → `/about`。
+- `pagesblog: false` (預設) → 顯示同名的 `public/pages/{slug}.md`
+- `pagesblog: true` → 顯示與首頁相同的文章列表 (以 label 當標題)
+
+新增頁面就在 `public/pages/` 裡新建 `{slug}.json`,同時 (若非 pagesblog) 建立 `{slug}.md`。
 
 ---
 
@@ -55,25 +54,22 @@
 ### `setting.json`
 ```json
 {
-  "id": 1,                      // 網址編號 → /1 (數字)
-  "title": "Markdown大全",      // 文章標題
-  "date": "2026/06/06",         // 發布日期
-  "visibility": "public",       // "public" = 公開, "private" = 只能透過網址存取
-  "imageSize": 64               // 封面顯示大小 (單一數字 = 正方形; 或 { "width": 120, "height": 80 })
+  "id": 1,
+  "title": "Markdown大全",
+  "date": "2026/06/06",
+  "visibility": "public",
+  "imageSize": 64
 }
 ```
+
+- `visibility`: `"public"` 公開 / `"private"` 只能透過網址存取
+- `imageSize`: 數字 = 正方形; 或 `{ "width": 120, "height": 80 }`
 
 ### `index.md`
 文章內容,支援完整 GitHub Flavored Markdown、GitHub Alerts、Mermaid 流程圖。
 
 ### 封面圖片
-任意檔名以 `cover.` 開頭即可自動偵測,例如:
-- `cover.png`
-- `cover.jpg`
-- `cover.webp`
-- `cover.svg`
-
-若不放圖片,首頁與文章頁就不會顯示縮圖。
+任意檔名以 `cover.` 開頭即可自動偵測 (`cover.png`、`cover.jpg`、`cover.webp`、`cover.svg`…)。
 
 ---
 
@@ -81,15 +77,62 @@
 
 - 首頁: `/`
 - 文章: `/{id}` (例如 `/1`、`/2`)
-- 導航頁: `/{slug}` (例如 `/tutorial`、`/about`)
-- 私人文章: 不會出現在首頁列表,但可以透過 `/{id}` 直接訪問
+- 導航頁: `/{slug}` (例如 `/tutorial`)
+- 私人文章: 不會出現在首頁,但可以透過 `/{id}` 直接訪問
+- **原始檔**: `/public/{相對路徑}` 會像 GitHub raw 一樣以純文字顯示
 
 ---
 
-## 6. Logo 與 PWA 圖示
+## 6. 下載區塊
 
-替換 `public/logo.png` 即可更換 Logo。若要更新 PWA 安裝圖示,編輯 `public/manifest.webmanifest`。
+在任何 Markdown 內用 ` ```download ` 程式碼區塊即可產生下載卡片:
+
+````markdown
+```download
+path: public/blog/markdown-guide/index.md
+size: 12 KB
+```
+````
+
+- `path`: 檔案位置。若以 `public/` 開頭會自動去掉,顯示時只留檔名。
+- `size`: 自由填 (KB / MB / GB…),純文字顯示。
+
+效果:
+
+```download
+path: public/blog/markdown-guide/index.md
+size: 12 KB
+```
 
 ---
+
+## 7. MCP (Model Context Protocol)
+
+Blog Meow 內建公開的 MCP 伺服器,可連到 ChatGPT / Claude / Cursor 等支援 MCP 的用戶端,讓 AI 直接讀取你的文章:
+
+- 端點: `https://<你的網域>/mcp`
+- 認證: 無 (所有內容本就公開)
+- 工具: `list_posts`、`get_post`、`list_pages`、`get_page`
+
+在 Claude Desktop 或 ChatGPT 的「連接器 / Connectors」加入上方 URL 即可使用。
+
+---
+
+## 8. Logo 與 PWA 圖示
+
+替換 `public/logo.png` 即可更換 Logo。PWA 圖示則編輯 `public/manifest.webmanifest`。
+
+---
+
+## 📦 原始碼
+
+想直接看檔案原文?點下方連結 (GitHub raw 風格,純文字顯示):
+
+- [`public/settings.json`](/public/settings.json)
+- [`public/index.md`](/public/index.md)
+- [`public/pages/tutorial.json`](/public/pages/tutorial.json)
+- [`public/pages/tutorial.md`](/public/pages/tutorial.md)
+- [`public/blog/markdown-guide/setting.json`](/public/blog/markdown-guide/setting.json)
+- [`public/blog/markdown-guide/index.md`](/public/blog/markdown-guide/index.md)
 
 祝寫作愉快 🐾
