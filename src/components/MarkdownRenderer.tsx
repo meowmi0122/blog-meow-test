@@ -281,13 +281,27 @@ export function MarkdownRenderer({ content }: Props) {
                   if (i !== arr.indexOf(firstEl)) return child;
                   const childChildren = child.props.children;
                   const newChildren = Array.isArray(childChildren)
-                    ? [
-                        (childChildren[0] as string).replace(
-                          /^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*\n?/,
-                          "",
-                        ),
-                        ...childChildren.slice(1),
-                      ]
+                    ? (() => {
+                        const rest = [
+                          (childChildren[0] as string).replace(
+                            /^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*\n?/,
+                            "",
+                          ),
+                          ...childChildren.slice(1),
+                        ];
+                        // Drop leading empty strings and a leading <br> that
+                        // remark-breaks inserts for the newline after [!NOTE].
+                        while (
+                          rest.length &&
+                          ((typeof rest[0] === "string" && rest[0] === "") ||
+                            (rest[0] &&
+                              typeof rest[0] === "object" &&
+                              (rest[0] as any).type === "br"))
+                        ) {
+                          rest.shift();
+                        }
+                        return rest;
+                      })()
                     : (childChildren as string).replace(
                         /^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*\n?/,
                         "",
