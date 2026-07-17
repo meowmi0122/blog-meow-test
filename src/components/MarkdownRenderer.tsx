@@ -14,6 +14,7 @@ import {
   OctagonAlert,
   Copy,
   Check,
+  Download,
 } from "lucide-react";
 
 interface Props {
