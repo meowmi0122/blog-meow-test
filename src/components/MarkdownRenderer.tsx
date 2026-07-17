@@ -109,6 +109,38 @@ function CodeBlock({ className, children }: { className?: string; children: Reac
   );
 }
 
+function DownloadBlock({ code }: { code: string }) {
+  // Parse simple key: value lines
+  const data: Record<string, string> = {};
+  for (const line of code.split(/\r?\n/)) {
+    const m = line.match(/^\s*([A-Za-z_][A-Za-z0-9_-]*)\s*:\s*(.*)$/);
+    if (m) data[m[1].toLowerCase()] = m[2].trim();
+  }
+  const rawPath = data.path ?? "";
+  const size = data.size ?? "";
+  // Strip leading "public/" so /public/files/foo.pdf becomes /files/foo.pdf
+  const href = rawPath.replace(/^\/?public\//, "/");
+  // Display only the file name
+  const displayName = rawPath.split(/[\\/]/).filter(Boolean).pop() ?? rawPath;
+  if (!rawPath) return null;
+  return (
+    <a
+      href={href}
+      download={displayName}
+      className="download-card"
+      aria-label={`下載 ${displayName}`}
+    >
+      <span className="download-card-icon">
+        <Download className="size-5" />
+      </span>
+      <span className="download-card-meta">
+        <span className="download-card-name">{displayName}</span>
+        {size && <span className="download-card-size">{size}</span>}
+      </span>
+    </a>
+  );
+}
+
 function InlineCode({ className, children, ...rest }: any) {
   const [copied, setCopied] = useState(false);
   const text = String(Array.isArray(children) ? children.join("") : children ?? "");
