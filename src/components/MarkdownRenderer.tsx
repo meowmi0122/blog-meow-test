@@ -249,6 +249,9 @@ export function MarkdownRenderer({ content }: Props) {
               if (lang === "mermaid") {
                 return <MermaidBlock code={codeStr} />;
               }
+              if (lang === "download") {
+                return <DownloadBlock code={codeStr} />;
+              }
               return <CodeBlock className={className}>{text}</CodeBlock>;
             }
             return <pre {...props} />;
