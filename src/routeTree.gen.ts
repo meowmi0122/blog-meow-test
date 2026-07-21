@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as PublicSplatRouteImport } from './routes/public.$'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
+import { Route as SlugIdRouteImport } from './routes/$slug.$id'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 
 const McpRoute = McpRouteImport.update({
@@ -49,6 +50,11 @@ const Char91DotmcpChar93ListToolsRoute =
     path: '/.mcp/list-tools',
     getParentRoute: () => rootRouteImport,
   } as any)
+const SlugIdRoute = SlugIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => SlugRoute,
+} as any)
 const Char91DotmcpChar93InvokeToolToolRoute =
   Char91DotmcpChar93InvokeToolToolRouteImport.update({
     id: '/.mcp/invoke-tool/$tool',
@@ -58,8 +64,9 @@ const Char91DotmcpChar93InvokeToolToolRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/$slug': typeof SlugRoute
+  '/$slug': typeof SlugRouteWithChildren
   '/mcp': typeof McpRoute
+  '/$slug/$id': typeof SlugIdRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/public/$': typeof PublicSplatRoute
@@ -67,8 +74,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/$slug': typeof SlugRoute
+  '/$slug': typeof SlugRouteWithChildren
   '/mcp': typeof McpRoute
+  '/$slug/$id': typeof SlugIdRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/public/$': typeof PublicSplatRoute
@@ -77,8 +85,9 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/$slug': typeof SlugRoute
+  '/$slug': typeof SlugRouteWithChildren
   '/mcp': typeof McpRoute
+  '/$slug/$id': typeof SlugIdRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/public/$': typeof PublicSplatRoute
@@ -90,6 +99,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$slug'
     | '/mcp'
+    | '/$slug/$id'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/public/$'
@@ -99,6 +109,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$slug'
     | '/mcp'
+    | '/$slug/$id'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/public/$'
@@ -108,6 +119,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$slug'
     | '/mcp'
+    | '/$slug/$id'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/public/$'
@@ -116,7 +128,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  SlugRoute: typeof SlugRoute
+  SlugRoute: typeof SlugRouteWithChildren
   McpRoute: typeof McpRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -168,6 +180,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/$slug/$id': {
+      id: '/$slug/$id'
+      path: '/$id'
+      fullPath: '/$slug/$id'
+      preLoaderRoute: typeof SlugIdRouteImport
+      parentRoute: typeof SlugRoute
+    }
     '/.mcp/invoke-tool/$tool': {
       id: '/.mcp/invoke-tool/$tool'
       path: '/.mcp/invoke-tool/$tool'
@@ -178,9 +197,19 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface SlugRouteChildren {
+  SlugIdRoute: typeof SlugIdRoute
+}
+
+const SlugRouteChildren: SlugRouteChildren = {
+  SlugIdRoute: SlugIdRoute,
+}
+
+const SlugRouteWithChildren = SlugRoute._addFileChildren(SlugRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  SlugRoute: SlugRoute,
+  SlugRoute: SlugRouteWithChildren,
   McpRoute: McpRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:

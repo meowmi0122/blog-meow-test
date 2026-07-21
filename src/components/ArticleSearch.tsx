@@ -50,6 +50,8 @@ export function ArticleSearch({ containerRef, contentKey, initialTerm = "" }: Pr
         if (!p) return NodeFilter.FILTER_REJECT;
         const tag = p.tagName;
         if (tag === "SCRIPT" || tag === "STYLE") return NodeFilter.FILTER_REJECT;
+        // 跳過 SVG (Mermaid 流程圖) — 在 SVG 內插入 HTML <mark> 會讓文字消失
+        if (p.closest("svg")) return NodeFilter.FILTER_REJECT;
         return node.nodeValue && node.nodeValue.length > 0
           ? NodeFilter.FILTER_ACCEPT
           : NodeFilter.FILTER_REJECT;

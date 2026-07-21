@@ -9,9 +9,11 @@ interface Props {
   showLogo?: boolean;
   /** 可覆寫要顯示的文章清單，預設為全部 public 文章 */
   posts?: Post[];
+  /** 文章連結前綴 slug (pagesblog 頁面時傳入 → /{prefix}/{id})，預設無 → /{id} */
+  linkPrefix?: string;
 }
 
-export function PostList({ title, showLogo = true, posts }: Props) {
+export function PostList({ title, showLogo = true, posts, linkPrefix }: Props) {
   const all = useMemo(() => posts ?? getAllPosts(), [posts]);
   const [q, setQ] = useState("");
 
@@ -64,8 +66,9 @@ export function PostList({ title, showLogo = true, posts }: Props) {
           return (
             <Link
               key={p.id}
-              to="/$slug"
-              params={{ slug: String(p.id) }}
+              {...(linkPrefix
+                ? { to: "/$slug/$id" as const, params: { slug: linkPrefix, id: String(p.id) } }
+                : { to: "/$slug" as const, params: { slug: String(p.id) } })}
               className="fade-up hover-lift glass group flex items-center gap-4 overflow-hidden rounded-2xl p-3 text-left hover:-translate-y-0.5 hover:shadow-md"
               style={{ animationDelay: `${i * 50}ms` }}
             >

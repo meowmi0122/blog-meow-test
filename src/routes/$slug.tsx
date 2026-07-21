@@ -106,7 +106,7 @@ function SlugView() {
     return (
       <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-5 pt-8 pb-24 sm:pt-10">
         <Navbar />
-        <PostList title={data.item.label} showLogo={false} />
+        <PostList title={data.item.label} showLogo={false} linkPrefix={data.item.slug} />
       </main>
     );
   }
