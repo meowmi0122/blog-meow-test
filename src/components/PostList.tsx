@@ -66,8 +66,9 @@ export function PostList({ title, showLogo = true, posts, linkPrefix }: Props) {
           return (
             <Link
               key={p.id}
-              to="/$slug"
-              params={{ slug: String(p.id) }}
+              {...(linkPrefix
+                ? { to: "/$slug/$id" as const, params: { slug: linkPrefix, id: String(p.id) } }
+                : { to: "/$slug" as const, params: { slug: String(p.id) } })}
               className="fade-up hover-lift glass group flex items-center gap-4 overflow-hidden rounded-2xl p-3 text-left hover:-translate-y-0.5 hover:shadow-md"
               style={{ animationDelay: `${i * 50}ms` }}
             >
