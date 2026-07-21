@@ -9,9 +9,11 @@ interface Props {
   showLogo?: boolean;
   /** 可覆寫要顯示的文章清單，預設為全部 public 文章 */
   posts?: Post[];
+  /** 文章連結前綴 slug (pagesblog 頁面時傳入 → /{prefix}/{id})，預設無 → /{id} */
+  linkPrefix?: string;
 }
 
-export function PostList({ title, showLogo = true, posts }: Props) {
+export function PostList({ title, showLogo = true, posts, linkPrefix }: Props) {
   const all = useMemo(() => posts ?? getAllPosts(), [posts]);
   const [q, setQ] = useState("");
 
