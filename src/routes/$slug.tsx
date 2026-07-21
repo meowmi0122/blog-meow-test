@@ -27,7 +27,7 @@ export const Route = createFileRoute("/$slug")({
     }
     // 導航列項目 → 部落格列表頁
     const navItem = navItems.find((i) => i.slug === raw);
-    if (navItem) return { kind: "nav-list", item: navItem };
+    if (navItem?.pagesblog) return { kind: "nav-list", item: navItem };
     // fallback: public/pages/{slug}.md
     const page = getPageBySlug(raw);
     if (!page) throw notFound();
